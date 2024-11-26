@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/F1_data" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/Fraud-detection" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/IRIS" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/Online-Retail" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/Regressions" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/Stock-analysis" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/data-of-weather" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/houses_price" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/analys/wine-quality" vcs="Git" />
+  </component>
+</project>
