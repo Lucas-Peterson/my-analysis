@@ -1,9 +1,9 @@
-### In this repo I want to make my conspects about regressions
+### In this repo I want to make my conspects about regressions (sorry for the strange equals, in my side it looks good.
 
 
 
 ### Features
-- Conspect about polynomial regression (this kata solution https://www.codewars.com/kata/591748b3f014a2593d0000d9 )
+- Conspect about regression (this kata solution https://www.codewars.com/kata/591748b3f014a2593d0000d9 )
 
 
 
