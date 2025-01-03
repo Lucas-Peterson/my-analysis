@@ -7,5 +7,5 @@ This project uses the FastF1 library to analyze and visualize Formula 1 telemetr
 This README.md is small, but project is also not so big. Will change it.
 
 
-### Feature
+### Future
 Analysis of weather conditions and driver performance
