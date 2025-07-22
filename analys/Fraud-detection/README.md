@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project involves building machine learning models to detect fraudulent credit card transactions. The dataset used for this analysis contains transactions labeled as normal or fraudulent, and the aim is to predict whether a given transaction is fraudulent or not. I use the dataset "Credit Card Fraud Detection Dataset" from Université Libre de Bruxelles (ULB) ---> [Link[(https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
+This project involves building machine learning models to detect fraudulent credit card transactions. The dataset used for this analysis contains transactions labeled as normal or fraudulent, and the aim is to predict whether a given transaction is fraudulent or not. I use the dataset "Credit Card Fraud Detection Dataset" from Université Libre de Bruxelles (ULB) ---> [Link](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud)
 
 Three different models are used in this project:
 1. Logistic Regression
