@@ -1,29 +1,26 @@
+import kagglehub
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import logging
 
-# Models and metrics
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, roc_auc_score, roc_curve
 
-# For handling imbalanced data
-from imblearn.over_sampling import SMOTE
-
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Download dataset using kagglehub API
+print("Downloading dataset from KaggleHub...")
+path = kagglehub.dataset_download("mlg-ulb/creditcardfraud")
+dataset_path = f"{path}/creditcard.csv"
+print(f"Path to dataset: {dataset_path}")
 
 # Load dataset
-logging.info("Loading dataset...")
-data = pd.read_csv("creditcard.csv")
-logging.info("Dataset loaded successfully.")
+print("Loading dataset...")
+data = pd.read_csv(dataset_path)
+print("Dataset loaded successfully.")
 
-# Exploratory Data Analysis (EDA)
-logging.info("Starting EDA...")
+# EDA: Class distribution
 plt.figure(figsize=(7, 5))
 sns.countplot(x='Class', data=data, color='steelblue')
 plt.title("Class Distribution (0: Normal Transactions, 1: Fraudulent Transactions)", fontsize=16)
@@ -33,113 +30,54 @@ plt.xticks(ticks=[0, 1], labels=["Normal", "Fraud"], fontsize=12)
 plt.grid(True)
 plt.show()
 
-logging.info("EDA completed successfully.")
-
-# Visualize distribution of transaction amounts
+# EDA: Transaction amount distribution
 plt.figure(figsize=(10, 6))
 sns.histplot(data['Amount'], bins=50, kde=True, color='blue')
 plt.title("Distribution of Transaction Amounts", fontsize=16)
 plt.xlabel("Transaction Amount (USD)", fontsize=14)
 plt.ylabel("Count", fontsize=14)
-plt.xlim([0, 3000])  # Limiting to 3000 for better visibility of majority transactions
+plt.xlim([0, 3000])
 plt.grid(True)
 plt.show()
 
-logging.info("Transaction amount distribution plotted.")
-
 # Data Preprocessing
-logging.info("Starting data preprocessing...")
 scaler = StandardScaler()
 data['Amount_scaled'] = scaler.fit_transform(data['Amount'].values.reshape(-1, 1))
 data['Time_scaled'] = scaler.fit_transform(data['Time'].values.reshape(-1, 1))
-
-# Drop the original 'Amount' and 'Time' columns
 data = data.drop(['Amount', 'Time'], axis=1)
 
-# Split data into features (X) and target (y)
+# Split data into features and target
 X = data.drop('Class', axis=1)
 y = data['Class']
 
-# Split the data into training and testing sets (70% train, 30% test)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
 
-# Apply SMOTE to balance the classes
-logging.info("Applying SMOTE...")
-sm = SMOTE(random_state=42)
-X_train_res, y_train_res = sm.fit_resample(X_train, y_train)
-logging.info("SMOTE applied successfully.")
+# Logistic Regression
+print("Training Logistic Regression...")
+lr = LogisticRegression(max_iter=1000)
+lr.fit(X_train, y_train)
+print("Logistic Regression trained.")
 
-# Model 1: Logistic Regression
-logging.info("Training Logistic Regression...")
-lr = LogisticRegression()
-lr.fit(X_train_res, y_train_res)
-logging.info("Logistic Regression trained successfully.")
-
-# Predictions for Logistic Regression
 y_pred_lr = lr.predict(X_test)
-
-# Model evaluation for Logistic Regression
-logging.info("Evaluating Logistic Regression...")
 print("Logistic Regression:")
 print(classification_report(y_test, y_pred_lr))
-
-# ROC AUC score for Logistic Regression
 roc_auc_lr = roc_auc_score(y_test, lr.predict_proba(X_test)[:, 1])
-logging.info(f"ROC AUC for Logistic Regression: {roc_auc_lr:.2f}")
-
-# ROC curve for Logistic Regression
 fpr_lr, tpr_lr, _ = roc_curve(y_test, lr.predict_proba(X_test)[:, 1])
 
-# Model 2: Decision Tree
-logging.info("Training Decision Tree...")
-dt = DecisionTreeClassifier(random_state=42)
-dt.fit(X_train_res, y_train_res)
-logging.info("Decision Tree trained successfully.")
+# Random Forest (with class_weight='balanced')
+print("Training Random Forest...")
+rf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
+rf.fit(X_train, y_train)
+print("Random Forest trained.")
 
-# Predictions for Decision Tree
-y_pred_dt = dt.predict(X_test)
-
-# Model evaluation for Decision Tree
-logging.info("Evaluating Decision Tree...")
-print("Decision Tree:")
-print(classification_report(y_test, y_pred_dt))
-
-# ROC AUC score for Decision Tree
-try:
-    roc_auc_dt = roc_auc_score(y_test, dt.predict_proba(X_test)[:, 1])
-    logging.info(f"ROC AUC for Decision Tree: {roc_auc_dt:.2f}")
-except AttributeError as e:
-    logging.error(f"Decision Tree does not support probability prediction: {e}")
-
-# ROC curve for Decision Tree
-try:
-    fpr_dt, tpr_dt, _ = roc_curve(y_test, dt.predict_proba(X_test)[:, 1])
-except AttributeError as e:
-    logging.error(f"Decision Tree does not support probability prediction: {e}")
-
-# Model 3: Random Forest
-logging.info("Training Random Forest...")
-rf = RandomForestClassifier(n_estimators=100, random_state=42)
-rf.fit(X_train_res, y_train_res)
-logging.info("Random Forest trained successfully.")
-
-# Predictions for Random Forest
 y_pred_rf = rf.predict(X_test)
-
-# Model evaluation for Random Forest
-logging.info("Evaluating Random Forest...")
 print("Random Forest:")
 print(classification_report(y_test, y_pred_rf))
-
-# ROC AUC score for Random Forest
 roc_auc_rf = roc_auc_score(y_test, rf.predict_proba(X_test)[:, 1])
-logging.info(f"ROC AUC for Random Forest: {roc_auc_rf:.2f}")
-
-# ROC curve for Random Forest
 fpr_rf, tpr_rf, _ = roc_curve(y_test, rf.predict_proba(X_test)[:, 1])
 
-# Visualize ROC curves for all models
-logging.info("Plotting ROC curves for all models...")
+# ROC Curves
 plt.figure(figsize=(10, 6))
 plt.plot(fpr_lr, tpr_lr, label=f'Logistic Regression (AUC = {roc_auc_lr:.2f})', color='blue', linewidth=2)
 plt.plot(fpr_rf, tpr_rf, label=f'Random Forest (AUC = {roc_auc_rf:.2f})', color='green', linewidth=2)
@@ -148,9 +86,44 @@ plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
 plt.xlabel('False Positive Rate (FPR)', fontsize=14)
 plt.ylabel('True Positive Rate (TPR)', fontsize=14)
-plt.title('ROC Curve Comparison: Logistic Regression, Decision Tree, Random Forest', fontsize=16)
+plt.title('ROC Curve Comparison: Logistic Regression, Random Forest', fontsize=16)
 plt.legend(loc="lower right", fontsize=12)
 plt.grid(True)
 plt.show()
 
-logging.info("ROC curves plotted successfully.")
+# --- Function for predicting new transaction ---
+def predict_new_transaction(input_dict):
+    """
+    input_dict — a dictionary like: {'V1': value, ..., 'V28': value, 'Amount': value, 'Time': value}
+    """
+    
+    amount_scaled = scaler.transform([[input_dict['Amount']]])[0][0]
+    time_scaled = scaler.transform([[input_dict['Time']]])[0][0]
+    # Build features in the same order as in X_train
+    features = []
+    for col in X.columns:
+        if col == 'Amount_scaled':
+            features.append(amount_scaled)
+        elif col == 'Time_scaled':
+            features.append(time_scaled)
+        else:
+            features.append(input_dict[col])
+    features_df = pd.DataFrame([features], columns=X.columns)
+
+    prob_lr = lr.predict_proba(features_df)[:, 1][0]
+    prob_rf = rf.predict_proba(features_df)[:, 1][0]
+    print(f"Logistic Regression: fraud probability = {prob_lr*100:.2f}%")
+    print(f"Random Forest:      fraud probability = {prob_rf*100:.2f}%")
+    return prob_lr, prob_rf
+
+# --- Example of usage ---
+example_transaction = {
+    'V1': 0.1, 'V2': -0.3, 'V3': 1.2, 'V4': 0.5, 'V5': -0.7, 'V6': 0.3, 'V7': -0.1,
+    'V8': 0.2, 'V9': -0.5, 'V10': 1.1, 'V11': 0.4, 'V12': -0.8, 'V13': 0.7, 'V14': -0.2,
+    'V15': 0.0, 'V16': 0.6, 'V17': -0.4, 'V18': 1.5, 'V19': -0.3, 'V20': 0.1, 'V21': 0.2,
+    'V22': -0.6, 'V23': 0.3, 'V24': -0.7, 'V25': 0.8, 'V26': 0.1, 'V27': -0.2, 'V28': 0.4,
+    'Amount': 100.0,    # transaction amount in $
+    'Time': 80000       # time
+}
+
+predict_new_transaction(example_transaction)
